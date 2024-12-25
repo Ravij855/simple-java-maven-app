@@ -2,43 +2,46 @@ pipeline {
     agent any
 
     stages {
-        stage('SCM') {
+        stage('Code Fetch') {
             steps {
-                echo 'Fetching the code'
-                git changelog: false, poll: false, url: 'https://github.com/TechWithKhanam/simple-java-maven-app.git'
+                echo 'Fetching & clone code from GitHub repository'
+                git branch: 'branch1', url: 'https://github.com/Ravij855/simple-java-maven-app.git'
             }
         }
-        stage('BUILD') {
+        stage('Build Code Using Maven') {
             steps {
-                echo 'Building the project'
+                echo 'Maven triggered, build going on'
                 bat 'mvn clean install'
             }
         }
-        stage('TEST') {
+        stage('Testing code using surefire') {
             steps {
-                echo 'Testing the project'
+                echo 'Testing the code'
                 bat 'mvn test'
             }
         }
-        stage('VERIFY DOCKERFILE') {
+        stage('Deploy .jar files'){
+            steps{
+                echo 'Deploy .jar files by Maven'
+                bat 'mvn clean package'
+            }
+        }
+        stage('Verify Dockerfile') {
             steps {
-                echo 'Verifying Dockerfile presence'
+                echo  'Verfying the dockerfile presence'
                 bat 'dir'
             }
         }
-        stage('DEPLOY') {
+        stage('Build Docker Image') {
             steps {
-                echo 'Deploying the project in Docker container'
-                script {
-                    // Check if Docker is running and available
-                    bat 'docker --version'
-                    
-                    // Build the Docker image
-                    bat 'docker build -t myapp1:latest .'
-                    
-                    // Run the Docker container
-                    bat 'docker run -d -p 9090:8080 --name myapp_container myapp1:latest'
-                }
+                echo 'Build the docker image'
+                bat 'docker build -t my-1st-dockerfile-project:latest .'
+            }
+        }
+        stage('Docker Diployment and Attching Container with Ports') {
+            steps {
+                echo 'Using Docker Diployment and Attching to new Container Assiging  Port'
+                bat 'docker run -d --name MY-DOCKER-CONTAINER01 -p 9090:8080 my-1st-dockerfile-project:latest'
             }
         }
     }
